@@ -17,7 +17,8 @@ export default function Navigation() {
   return (
     <>
       {/* --- モバイル用ボトムナビゲーション --- */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-20">
+      {/* ★修正点: z-indexを z-50 に上げて最前面に表示 */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
         <div className="flex justify-around h-16">
           {navItems.map((item) => {
             const isActive = pathname.startsWith(item.href);

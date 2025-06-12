@@ -1,5 +1,6 @@
 'use client';
 
+// (import文は変更なし)
 import { dummyLessons, Word } from '@/lib/dummy-data';
 import { notFound, useParams } from 'next/navigation';
 import { useState, useMemo, useEffect } from 'react';
@@ -10,14 +11,12 @@ import QuizFooter from '@/components/lesson/QuizFooter';
 import LessonComplete from '@/components/lesson/LessonComplete';
 import ProgressBar from '@/components/lesson/ProgressBar';
 
-// 配列をシャッフルするヘルパー関数
-const shuffleArray = (array: any[]) => {
-  return [...array].sort(() => Math.random() - 0.5);
-};
+// ... (shuffleArray関数は変更なし)
 
 type LessonStep = 'multipleChoice' | 'listeningInput';
 
 export default function LessonPage() {
+  // (useStateなどのフック部分は変更なし)
   const params = useParams();
   const categoryId = params.categoryId as string;
 
@@ -29,6 +28,7 @@ export default function LessonPage() {
   const [mcOptions, setMcOptions] = useState<Word[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
+  // (lesson, currentWord, mcOptionsの生成ロジックは変更なし)
   const lesson = useMemo(() => {
     return dummyLessons.find(l => l.id === categoryId);
   }, [categoryId]);
@@ -40,7 +40,6 @@ export default function LessonPage() {
   const isLessonComplete = questionIndex >= lesson.words.length;
   const currentWord = lesson.words[questionIndex];
 
-  // 4択問題の選択肢を生成
   useEffect(() => {
     if (currentWord) {
       const incorrectOptions = lesson.words.filter(w => w.id !== currentWord.id);
@@ -49,7 +48,9 @@ export default function LessonPage() {
     }
   }, [currentWord, lesson.words]);
 
-  const handleMcAnswer = (answerId: number) => {
+
+  // (handleAnswer, handleContinueなどの関数は変更なし)
+   const handleMcAnswer = (answerId: number) => {
     const isCorrect = answerId === currentWord.id;
     setStatus('feedback');
     setLastAnswerCorrect(isCorrect);
@@ -72,31 +73,32 @@ export default function LessonPage() {
     setLastAnswerCorrect(null);
     setSelectedId(null);
 
-    // 4択問題の後はリスニング問題へ
     if (step === 'multipleChoice') {
       setStep('listeningInput');
     } else {
-      // リスニング問題の後は次の単語の4択問題へ
       setStep('multipleChoice');
       setQuestionIndex(prev => prev + 1);
     }
   };
+
 
   if (isLessonComplete) {
     return <LessonComplete totalQuestions={lesson.words.length * 2} correctAnswers={correctCount} />;
   }
 
   if (!currentWord) {
-    return null; // データ読み込み中の安全対策
+    return null;
   }
 
   return (
-    <div className="flex flex-col h-screen max-h-screen p-4 md:p-8">
+    // ★修正点: モバイル表示(md未満)の時、下の余白(padding-bottom)を大きく確保
+    <div className="flex flex-col h-full max-h-screen p-4 pb-24 md:p-8 md:pb-8">
       <ProgressBar
         current={questionIndex * 2 + (step === 'multipleChoice' ? 0 : 1)}
         total={lesson.words.length * 2}
       />
       <div className="flex-grow flex items-center justify-center">
+        {/* (問題表示部分は変更なし) */}
         {step === 'multipleChoice' && mcOptions.length > 0 && (
           <MultipleChoice 
             key={`${questionIndex}-mc`}
@@ -116,6 +118,7 @@ export default function LessonPage() {
           />
         )}
       </div>
+      {/* QuizFooterはfixedなので、このdivの外に表示される */}
       {status === 'feedback' && (
         <QuizFooter 
           status={lastAnswerCorrect ? 'correct' : 'incorrect'}
@@ -126,3 +129,8 @@ export default function LessonPage() {
     </div>
   );
 }
+
+// shuffleArray関数の定義 (もし別ファイルにない場合)
+const shuffleArray = (array: any[]) => {
+  return [...array].sort(() => Math.random() - 0.5);
+};
